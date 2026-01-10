@@ -5,6 +5,7 @@ import MainLayout from './components/MainLayout';
 import Dashboard from './pages/Dashboard';
 import Inventory from './pages/Inventory'; 
 import Reseller from './pages/Resellers';
+import Order from './pages/Orders';
 
 function App() {
   const [session, setSession] = useState(null);
@@ -39,6 +40,8 @@ function App() {
       {activeTab === 'items' && <Inventory />}
 
       {activeTab === 'resellers' && <Reseller />}
+
+      {activeTab === 'orders' && <Order />}
 
       {/* Add other conditions for 'resellers' or 'orders' here */}
       
