@@ -1,7 +1,7 @@
 import React from 'react';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
-import BottomNav from '../components/Bottomnav';
+import BottomNav from '../components/BottomNav';
 
 const MainLayout = ({ children, activeTab, setActiveTab }) => {
   return (

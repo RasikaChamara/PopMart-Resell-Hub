@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Inventory from './pages/Inventory'; 
 import Reseller from './pages/Resellers';
 import Order from './pages/Orders';
+import Payout from './pages/Payout';
 
 function App() {
   const [session, setSession] = useState(null);
@@ -42,6 +43,8 @@ function App() {
       {activeTab === 'resellers' && <Reseller />}
 
       {activeTab === 'orders' && <Order />}
+
+      {activeTab === 'payout' && <Payout />}
 
       {/* Add other conditions for 'resellers' or 'orders' here */}
       

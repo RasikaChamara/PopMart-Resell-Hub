@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Package, Users, Receipt, LogOut } from 'lucide-react';
+import { LayoutDashboard, Package, Users, Receipt, LogOut,CircleDollarSign } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
 const Sidebar = ({ activeTab, setActiveTab }) => {
@@ -8,6 +8,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
     { id: 'items', name: 'Inventory', icon: <Package size={20} /> },
     { id: 'resellers', name: 'Resellers', icon: <Users size={20} /> },
     { id: 'orders', name: 'Orders', icon: <Receipt size={20} /> },
+    { id: 'payout', name: 'Payout', icon: <CircleDollarSign size={20} /> },
   ];
 
   const handleLogout = async () => {

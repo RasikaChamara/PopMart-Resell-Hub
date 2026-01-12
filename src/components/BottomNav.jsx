@@ -1,12 +1,13 @@
 import React from 'react';
-import { LayoutDashboard, Package, Users, Receipt } from 'lucide-react';
+import { LayoutDashboard, Package, Users, Receipt,CircleDollarSign } from 'lucide-react';
 
 const BottomNav = ({ activeTab, setActiveTab }) => {
   const tabs = [
     { id: 'dashboard', icon: <LayoutDashboard size={22} />, label: 'Home' },
     { id: 'items', icon: <Package size={22} />, label: 'Items' },
-    { id: 'resellers', icon: <Users size={22} />, label: 'People' },
+    { id: 'resellers', icon: <Users size={22} />, label: 'Resellers' },
     { id: 'orders', icon: <Receipt size={22} />, label: 'Orders' },
+    { id: 'payout', icon: <CircleDollarSign size={22} />, label: 'Payout' },
   ];
 
   return (
