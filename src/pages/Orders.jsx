@@ -18,6 +18,7 @@ import {
   CheckCircle2,
   RotateCcw,
   Ban,
+  User,
 } from "lucide-react";
 
 const Orders = () => {
@@ -150,7 +151,7 @@ const Orders = () => {
       {/* Header */}
       <div className="flex justify-between items-end">
         <div>
-          <h2 className="text-3xl font-black text-main uppercase">Orders</h2>
+          <h2 className="text-3xl font-black text-main">Orders</h2>
           <p className="text-gray-500 text-sm font-medium">
             Tracking {orders.length} shipments
           </p>
@@ -182,159 +183,182 @@ const Orders = () => {
 
       {/* List */}
       <div className="grid gap-3">
-        {orders
-          .filter(
-            (o) =>
-              o.customer_name
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase()) ||
-              o.order_id.includes(searchTerm)
-          )
-          .map((order) => (
-            <div
-              key={order.order_id}
-              className={`bg-gray-50/50 rounded-[28px] border border-main/10 transition-all overflow-hidden ${
-                expandedId === order.order_id
-                  ? "ring-2 ring-main bg-white shadow-xl"
-                  : ""
-              }`}
-            >
-              {/* TOP ROW */}
-              <div className="p-5 flex justify-between items-center">
-                <div
-                  className="flex items-center gap-4 cursor-pointer flex-1"
+        {loading ? (
+          /* LOADING STATE: Shown when loading is true */
+          <div className="flex flex-col items-center justify-center py-20 text-gray-400 space-y-4">
+            <div className="w-10 h-10 border-4 border-main border-t-transparent rounded-full animate-spin"></div>
+            <p className="font-bold animate-pulse uppercase tracking-widest text-xs">
+              Syncing with Database...
+            </p>
+          </div>
+        ) : (
+          /* DATA STATE: Shown when loading is false */
+          orders
+            .filter(
+              (o) =>
+                o.customer_name
+                  .toLowerCase()
+                  .includes(searchTerm.toLowerCase()) ||
+                o.order_id.includes(searchTerm)
+            )
+            .map((order) => (
+              <div
+                key={order.order_id}
+                className={`bg-gray-50/50 rounded-[28px] border border-main/10 transition-all overflow-hidden ${
+                  expandedId === order.order_id
+                    ? "ring-2 ring-main bg-white shadow-xl"
+                    : ""
+                }`}
+              >
+                {/* TOP ROW */}
+                <div className="p-5 flex justify-between items-center">
+                  <div
+                    className="flex items-center gap-4 cursor-pointer flex-1"
+                    onClick={() =>
+                      setExpandedId(
+                        expandedId === order.order_id ? null : order.order_id
+                      )
+                    }
+                  >
+                    <div className="w-12 h-12 bg-main rounded-xl flex items-center justify-center text-sub shadow-md">
+                      <ShoppingBag size={22} />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-main">
+                        {order.customer_name}
+                      </h3>
+                      <div className="flex gap-2 items-center mt-1">
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${getStatusColor(
+                            order.delivery_status
+                          )}`}
+                        >
+                          {order.delivery_status}
+                        </span>
+                        <span className="text-[11px] text-gray-400 font-mono uppercase">
+                          {order.order_id}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => handleEdit(order)}
+                      className="p-2 text-gray-400 hover:text-main"
+                    >
+                      <Edit2 size={18} />
+                    </button>
+                    <button
+                      onClick={() =>
+                        setDeleteConfirm({ open: true, id: order.order_id })
+                      }
+                      className="p-2 text-gray-400 hover:text-red-500"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* EXPANDED CONTENT */}
+                {expandedId === order.order_id && (
+                  <div className="px-5 pb-4 animate-in fade-in slide-in-from-top-2">
+                    <div className="pt-4 border-t border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-3">
+                        <div className="flex items-start gap-3 bg-white p-3 rounded-2xl border border-gray-50">
+                          <User size={16} className="text-main mt-1" />
+                          <div>
+                            <p className="text-[10px] uppercase font-bold text-gray-400">
+                              Customer Name
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              {order.customer_name}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3 bg-white p-3 rounded-2xl border border-gray-50">
+                          <MapPin size={16} className="text-main mt-1" />
+                          <div>
+                            <p className="text-[10px] uppercase font-bold text-gray-400">
+                              Delivery Address
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              {order.customer_address}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 bg-white p-3 rounded-2xl border border-gray-50">
+                          <Phone size={16} className="text-main" />
+                          <div>
+                            <p className="text-[10px] uppercase font-bold text-gray-400">
+                              Contacts
+                            </p>
+                            <p className="text-sm text-gray-600 font-bold">
+                              {order.contact_no_1} /{" "}
+                              {order.contact_no_2 || "N/A"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 bg-white p-3 rounded-2xl border border-gray-50">
+                          <Truck size={16} className="text-main" />
+                          <div>
+                            <p className="text-[10px] uppercase font-bold text-gray-400">
+                              Courier & Tracking
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              {order.courier_service} -{" "}
+                              <span className="font-mono font-bold">
+                                {order.tracking_no}
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="bg-main text-sub p-5 rounded-[24px]">
+                        <p className="text-[10px] uppercase font-bold opacity-60 mb-3">
+                          Pricing & Profit
+                        </p>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span>Selling Price</span>
+                            <span className="font-bold">
+                              Rs. {order.sell_price_at_sale}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Delivery</span>
+                            <span className="font-bold">
+                              Rs. {order.delivery_charges}
+                            </span>
+                          </div>
+                          <div className="flex justify-between pt-2 border-t border-white/10 text-sub font-black italic">
+                            <span>Commission (25%)</span>
+                            <span>Rs. {order.commission_amount}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* BOTTOM TOGGLE */}
+                <button
                   onClick={() =>
                     setExpandedId(
                       expandedId === order.order_id ? null : order.order_id
                     )
                   }
+                  className="w-full py-2 flex justify-center text-gray-300 hover:text-main"
                 >
-                  <div className="w-12 h-12 bg-main rounded-xl flex items-center justify-center text-sub shadow-md">
-                    <ShoppingBag size={22} />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-main">
-                      {order.customer_name}
-                    </h3>
-                    <div className="flex gap-2 items-center mt-1">
-                      <span
-                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${getStatusColor(
-                          order.delivery_status
-                        )}`}
-                      >
-                        {order.delivery_status}
-                      </span>
-                      <span className="text-[11px] text-gray-400 font-mono uppercase">
-                        {order.order_id}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex gap-1">
-                  <button
-                    onClick={() => handleEdit(order)}
-                    className="p-2 text-gray-400 hover:text-main"
-                  >
-                    <Edit2 size={18} />
-                  </button>
-                  <button
-                    onClick={() =>
-                      setDeleteConfirm({ open: true, id: order.order_id })
-                    }
-                    className="p-2 text-gray-400 hover:text-red-500"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
+                  <ChevronDown
+                    size={20}
+                    className={`transition-transform duration-500 ${
+                      expandedId === order.order_id ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
               </div>
-
-              {/* EXPANDED CONTENT */}
-              {expandedId === order.order_id && (
-                <div className="px-5 pb-4 animate-in fade-in slide-in-from-top-2">
-                  <div className="pt-4 border-t border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-3">
-                      <div className="flex items-start gap-3 bg-white p-3 rounded-2xl border border-gray-50">
-                        <MapPin size={16} className="text-main mt-1" />
-                        <div>
-                          <p className="text-[10px] uppercase font-bold text-gray-400">
-                            Delivery Address
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            {order.customer_address}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 bg-white p-3 rounded-2xl border border-gray-50">
-                        <Phone size={16} className="text-main" />
-                        <div>
-                          <p className="text-[10px] uppercase font-bold text-gray-400">
-                            Contacts
-                          </p>
-                          <p className="text-sm text-gray-600 font-bold">
-                            {order.contact_no_1} / {order.contact_no_2 || "N/A"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 bg-white p-3 rounded-2xl border border-gray-50">
-                        <Truck size={16} className="text-main" />
-                        <div>
-                          <p className="text-[10px] uppercase font-bold text-gray-400">
-                            Courier & Tracking
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            {order.courier_service} -{" "}
-                            <span className="font-mono font-bold">
-                              {order.tracking_no}
-                            </span>
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="bg-main text-sub p-5 rounded-[24px]">
-                      <p className="text-[10px] uppercase font-bold opacity-60 mb-3">
-                        Pricing & Profit
-                      </p>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span>Selling Price</span>
-                          <span className="font-bold">
-                            Rs. {order.sell_price_at_sale}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Delivery</span>
-                          <span className="font-bold">
-                            Rs. {order.delivery_charges}
-                          </span>
-                        </div>
-                        <div className="flex justify-between pt-2 border-t border-white/10 text-sub font-black italic">
-                          <span>Commission (25%)</span>
-                          <span>Rs. {order.commission_amount}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* BOTTOM TOGGLE */}
-              <button
-                onClick={() =>
-                  setExpandedId(
-                    expandedId === order.order_id ? null : order.order_id
-                  )
-                }
-                className="w-full py-2 flex justify-center text-gray-300 hover:text-main"
-              >
-                <ChevronDown
-                  size={20}
-                  className={`transition-transform duration-500 ${
-                    expandedId === order.order_id ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
-            </div>
-          ))}
+            ))
+        )}
       </div>
 
       {/* ADD/EDIT MODAL */}
