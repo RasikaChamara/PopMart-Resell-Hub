@@ -53,28 +53,25 @@ const Orders = () => {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      // Fetch Orders, Items, and Resellers in parallel
       const [ord, itm, res] = await Promise.all([
         supabase
           .from("orders")
           .select("*, items(item_name), resellers(reseller_name)")
-          .order("date", { ascending: false }),
+          .order("date", { ascending: false })
+          .order("order_id", { ascending: false }),
         supabase.from("items").select("item_id, item_name"),
         supabase.from("resellers").select("reseller_id, reseller_name"),
       ]);
 
-      // Check for errors in any of the responses
       if (ord.error) throw ord.error;
       if (itm.error) throw itm.error;
       if (res.error) throw res.error;
 
-      // Update states only if all requests succeeded
       setOrders(ord.data ?? []);
       setItems(itm.data ?? []);
       setResellers(res.data ?? []);
     } catch (error) {
       console.error("Failed to sync app data:", error.message);
-      // Optional: Add a toast notification or alert for the user
     } finally {
       setLoading(false);
     }
@@ -109,9 +106,16 @@ const Orders = () => {
     setLoading(true);
 
     if (editingId) {
+      // Remove joined tables before updating
+      const {
+        items: _items,
+        resellers: _resellers,
+        commission_amount: _comm,
+        ...updateData
+      } = formData;
       const { error } = await supabase
         .from("orders")
-        .update(formData)
+        .update(updateData)
         .eq("order_id", editingId);
       if (error) {
         setErrorPopup({ open: true, message: error.message });
@@ -134,7 +138,9 @@ const Orders = () => {
   };
 
   const handleEdit = (order) => {
-    setFormData(order);
+    // We only want the core database fields in the form, not the nested join objects
+    const { items: _i, resellers: _r, ...cleanOrder } = order;
+    setFormData(cleanOrder);
     setEditingId(order.order_id);
     setIsModalOpen(true);
   };
@@ -151,7 +157,7 @@ const Orders = () => {
       {/* Header */}
       <div className="flex justify-between items-end">
         <div>
-          <h2 className="text-3xl font-black text-main">Orders</h2>
+          <h2 className="text-3xl font-black text-main">ORDERS</h2>
           <p className="text-gray-500 text-sm font-medium">
             Tracking {orders.length} shipments
           </p>
@@ -184,23 +190,20 @@ const Orders = () => {
       {/* List */}
       <div className="grid gap-3">
         {loading ? (
-          /* LOADING STATE: Shown when loading is true */
           <div className="flex flex-col items-center justify-center py-20 text-gray-400 space-y-4">
             <div className="w-10 h-10 border-4 border-main border-t-transparent rounded-full animate-spin"></div>
             <p className="font-bold animate-pulse uppercase tracking-widest text-xs">
-              Syncing with Database...
+              Syncing...
             </p>
           </div>
         ) : (
-          /* DATA STATE: Shown when loading is false */
           orders
-            .filter(
-              (o) =>
-                o.customer_name
-                  .toLowerCase()
-                  .includes(searchTerm.toLowerCase()) ||
-                o.order_id.includes(searchTerm)
-            )
+            .filter((o) => {
+              const name = o.customer_name?.toLowerCase() || "";
+              const id = String(o.order_id).toLowerCase();
+              const term = searchTerm.toLowerCase();
+              return name.includes(term) || id.includes(term);
+            })
             .map((order) => (
               <div
                 key={order.order_id}
@@ -227,7 +230,9 @@ const Orders = () => {
                       <h3 className="font-bold text-main">
                         {order.customer_name}
                       </h3>
-                      <div className="flex gap-2 items-center mt-1">
+                      <div className="flex gap-3 items-center mt-1">
+                        {" "}
+                        {/* Increased gap to 3 */}
                         <span
                           className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${getStatusColor(
                             order.delivery_status
@@ -238,9 +243,16 @@ const Orders = () => {
                         <span className="text-[11px] text-gray-400 font-mono uppercase">
                           {order.order_id}
                         </span>
+                        {/* --- ADDED DATE SECTION START --- */}
+                        <span className="text-[11px] text-gray-400 flex items-center gap-1 border-l pl-3 border-gray-200">
+                          <Calendar size={12} className="text-gray-400" />
+                          {order.date}
+                        </span>
+                        {/* --- ADDED DATE SECTION END --- */}
                       </div>
                     </div>
                   </div>
+
                   <div className="flex gap-1">
                     <button
                       onClick={() => handleEdit(order)}
@@ -279,7 +291,7 @@ const Orders = () => {
                           <MapPin size={16} className="text-main mt-1" />
                           <div>
                             <p className="text-[10px] uppercase font-bold text-gray-400">
-                              Delivery Address
+                              Address
                             </p>
                             <p className="text-sm text-gray-600">
                               {order.customer_address}
@@ -302,7 +314,7 @@ const Orders = () => {
                           <Truck size={16} className="text-main" />
                           <div>
                             <p className="text-[10px] uppercase font-bold text-gray-400">
-                              Courier & Tracking
+                              Courier
                             </p>
                             <p className="text-sm text-gray-600">
                               {order.courier_service} -{" "}
@@ -334,13 +346,16 @@ const Orders = () => {
                             <span>Commission (25%)</span>
                             <span>Rs. {order.commission_amount}</span>
                           </div>
+                          <div className="flex justify-between pt-2 border-t border-white/10 text-sub font-black italic">
+                            <span>Reseller ID</span>
+                            <span>{order.reseller_id}</span>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* BOTTOM TOGGLE */}
                 <button
                   onClick={() =>
                     setExpandedId(
@@ -379,7 +394,7 @@ const Orders = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <input
                   required
-                  disabled={editingId}
+                  disabled={!!editingId}
                   placeholder="Order ID"
                   className="w-full p-4 rounded-2xl bg-white border border-gray-200 outline-none focus:ring-2 focus:ring-main disabled:opacity-50"
                   value={formData.order_id}
@@ -474,7 +489,6 @@ const Orders = () => {
                   <p className="text-xs font-bold text-main uppercase">
                     Product & Partner
                   </p>
-                  {/* Item Dropdown */}
                   <select
                     required
                     className="w-full p-4 rounded-2xl bg-white border border-gray-200 outline-none"
@@ -486,11 +500,10 @@ const Orders = () => {
                     <option value="">Select Item</option>
                     {items.map((i) => (
                       <option key={i.item_id} value={i.item_id}>
-                        {i.item_id} - {i.item_name}
+                        {i.item_name}
                       </option>
                     ))}
                   </select>
-                  {/* Reseller Dropdown */}
                   <select
                     required
                     className="w-full p-4 rounded-2xl bg-white border border-gray-200 outline-none"
@@ -502,7 +515,7 @@ const Orders = () => {
                     <option value="">Select Reseller</option>
                     {resellers.map((r) => (
                       <option key={r.reseller_id} value={r.reseller_id}>
-                        {r.reseller_id} - {r.reseller_name}
+                        {r.reseller_name}
                       </option>
                     ))}
                   </select>
@@ -600,7 +613,7 @@ const Orders = () => {
         </div>
       )}
 
-      {/* Errors & Delete Popups same as previous pages */}
+      {/* Delete Confirmation */}
       {deleteConfirm.open && (
         <div className="fixed inset-0 bg-main/80 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-sm rounded-[32px] p-8 text-center shadow-2xl">
@@ -635,6 +648,7 @@ const Orders = () => {
         </div>
       )}
 
+      {/* Error Popup */}
       {errorPopup.open && (
         <div className="fixed inset-0 bg-main/80 backdrop-blur-sm z-[120] flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-sm rounded-[32px] p-8 text-center shadow-2xl">

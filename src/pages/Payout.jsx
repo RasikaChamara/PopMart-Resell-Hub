@@ -249,6 +249,9 @@ const PayoutCard = ({ order, onPay, isPastDue }) => (
       <p className="font-bold text-main">
         {order.resellers?.reseller_name || "Anonymous"}
       </p>
+      <p className="font-bold text-main">
+        {order.reseller_id }
+      </p>
       <div className="flex gap-3 items-center mt-1">
         <p className="text-[10px] text-gray-400 font-mono uppercase">
           {order.order_id}

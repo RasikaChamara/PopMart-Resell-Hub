@@ -43,11 +43,10 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
       <div className="mt-auto p-3 bg-white/5 rounded-3xl flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-sub flex items-center justify-center text-main font-bold shadow-inner">
-            AD
+            L
           </div>
           <div className="text-sm">
-            <p className="font-bold text-white leading-none">Admin</p>
-            <p className="text-[10px] text-gray-500 uppercase mt-1">Online</p>
+            <p className="font-bold text-white leading-none">Log Out</p>
           </div>
         </div>
         

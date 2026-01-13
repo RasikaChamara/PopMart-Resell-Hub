@@ -174,7 +174,7 @@ const Resellers = () => {
       {/* Header */}
       <div className="flex justify-between items-end">
         <div>
-          <h2 className="text-3xl font-black text-main">Resellers</h2>
+          <h2 className="text-3xl font-black text-main">RESELLERS</h2>
           <p className="text-gray-500 text-sm font-medium">
             Managing {resellers.length} partners
           </p>

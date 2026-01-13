@@ -143,7 +143,7 @@ const Inventory = () => {
       {/* Header */}
       <div className="flex justify-between items-end">
         <div>
-          <h2 className="text-3xl font-black text-main">Inventory</h2>
+          <h2 className="text-3xl font-black text-main">INVENTORY</h2>
           <p className="text-gray-500 text-sm font-medium">
             Tracking {items.length} items
           </p>
