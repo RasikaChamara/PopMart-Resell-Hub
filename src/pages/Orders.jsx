@@ -214,15 +214,15 @@ const Orders = () => {
                 }`}
               >
                 {/* TOP ROW */}
-                <div className="p-5 flex justify-between items-center">
-                  <div
-                    className="flex items-center gap-4 cursor-pointer flex-1"
-                    onClick={() =>
-                      setExpandedId(
-                        expandedId === order.order_id ? null : order.order_id
-                      )
-                    }
-                  >
+                <div
+                  className="p-5 flex justify-between items-center cursor-pointer"
+                  onClick={() =>
+                    setExpandedId(
+                      expandedId === order.order_id ? null : order.order_id
+                    )
+                  }
+                >
+                  <div className="flex items-center gap-4 flex-1">
                     <div className="w-12 h-12 bg-main rounded-xl flex items-center justify-center text-sub shadow-md">
                       <ShoppingBag size={22} />
                     </div>
@@ -231,8 +231,6 @@ const Orders = () => {
                         {order.customer_name}
                       </h3>
                       <div className="flex gap-3 items-center mt-1">
-                        {" "}
-                        {/* Increased gap to 3 */}
                         <span
                           className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${getStatusColor(
                             order.delivery_status
@@ -241,52 +239,40 @@ const Orders = () => {
                           {order.delivery_status}
                         </span>
                         <span className="text-[11px] text-gray-400 font-mono uppercase">
-                          {order.order_id}
+                          #{order.order_id}
                         </span>
-                        {/* --- ADDED DATE SECTION START --- */}
-                        <span className="text-[11px] text-gray-400 flex items-center gap-1 border-l pl-3 border-gray-200">
-                          <Calendar size={12} className="text-gray-400" />
-                          {order.date}
-                        </span>
-                        {/* --- ADDED DATE SECTION END --- */}
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex gap-1">
-                    <button
-                      onClick={() => handleEdit(order)}
-                      className="p-2 text-gray-400 hover:text-main"
-                    >
-                      <Edit2 size={18} />
-                    </button>
-                    <button
-                      onClick={() =>
-                        setDeleteConfirm({ open: true, id: order.order_id })
-                      }
-                      className="p-2 text-gray-400 hover:text-red-500"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
+                  <ChevronDown
+                    size={20}
+                    className={`text-gray-300 transition-transform duration-500 ${
+                      expandedId === order.order_id
+                        ? "rotate-180 text-main"
+                        : ""
+                    }`}
+                  />
                 </div>
 
                 {/* EXPANDED CONTENT */}
                 {expandedId === order.order_id && (
-                  <div className="px-5 pb-4 animate-in fade-in slide-in-from-top-2">
+                  <div className="px-5 pb-5 animate-in fade-in slide-in-from-top-2">
                     <div className="pt-4 border-t border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-3">
-                        <div className="flex items-start gap-3 bg-white p-3 rounded-2xl border border-gray-50">
-                          <User size={16} className="text-main mt-1" />
+                        {/* Date added here inside expand */}
+                        <div className="flex items-center gap-3 bg-white p-3 rounded-2xl border border-gray-50">
+                          <Calendar size={16} className="text-main" />
                           <div>
                             <p className="text-[10px] uppercase font-bold text-gray-400">
-                              Customer Name
+                              Order Date
                             </p>
-                            <p className="text-sm text-gray-600">
-                              {order.customer_name}
+                            <p className="text-sm text-gray-600 font-medium">
+                              {order.date}
                             </p>
                           </div>
                         </div>
+
                         <div className="flex items-start gap-3 bg-white p-3 rounded-2xl border border-gray-50">
                           <MapPin size={16} className="text-main mt-1" />
                           <div>
@@ -298,6 +284,7 @@ const Orders = () => {
                             </p>
                           </div>
                         </div>
+
                         <div className="flex items-center gap-3 bg-white p-3 rounded-2xl border border-gray-50">
                           <Phone size={16} className="text-main" />
                           <div>
@@ -310,6 +297,7 @@ const Orders = () => {
                             </p>
                           </div>
                         </div>
+
                         <div className="flex items-center gap-3 bg-white p-3 rounded-2xl border border-gray-50">
                           <Truck size={16} className="text-main" />
                           <div>
@@ -325,52 +313,60 @@ const Orders = () => {
                           </div>
                         </div>
                       </div>
-                      <div className="bg-main text-sub p-5 rounded-[24px]">
-                        <p className="text-[10px] uppercase font-bold opacity-60 mb-3">
-                          Pricing & Profit
-                        </p>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span>Selling Price</span>
-                            <span className="font-bold">
-                              Rs. {order.sell_price_at_sale}
-                            </span>
+
+                      <div className="flex flex-col gap-4">
+                        <div className="bg-main text-sub p-5 rounded-[24px]">
+                          <p className="text-[10px] uppercase font-bold opacity-60 mb-3">
+                            Pricing & Profit
+                          </p>
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span>Selling Price</span>
+                              <span className="font-bold">
+                                Rs. {order.sell_price_at_sale}
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Delivery</span>
+                              <span className="font-bold">
+                                Rs. {order.delivery_charges}
+                              </span>
+                            </div>
+                            <div className="flex justify-between pt-2 border-t border-white/10 text-sub font-black italic">
+                              <span>Commission 25%</span>
+                              <span>Rs. {order.commission_amount}</span>
+                            </div>
+                            <div className="flex justify-between pt-2 border-t border-white/10 text-sub font-black italic">
+                              <span>Reseller ID</span>
+                              <span>{order.reseller_id}</span>
+                            </div>
                           </div>
-                          <div className="flex justify-between">
-                            <span>Delivery</span>
-                            <span className="font-bold">
-                              Rs. {order.delivery_charges}
-                            </span>
-                          </div>
-                          <div className="flex justify-between pt-2 border-t border-white/10 text-sub font-black italic">
-                            <span>Commission (25%)</span>
-                            <span>Rs. {order.commission_amount}</span>
-                          </div>
-                          <div className="flex justify-between pt-2 border-t border-white/10 text-sub font-black italic">
-                            <span>Reseller ID</span>
-                            <span>{order.reseller_id}</span>
-                          </div>
+                        </div>
+
+                        {/* Edit/Delete Action Group like Resellers/Inventory */}
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleEdit(order)}
+                            className="flex-1 flex items-center justify-center gap-2 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold hover:bg-main hover:text-sub transition-all"
+                          >
+                            <Edit2 size={16} /> Edit
+                          </button>
+                          <button
+                            onClick={() =>
+                              setDeleteConfirm({
+                                open: true,
+                                id: order.order_id,
+                              })
+                            }
+                            className="flex-1 flex items-center justify-center gap-2 bg-red-50 text-red-500 py-3 rounded-xl font-bold hover:bg-red-500 hover:text-white transition-all"
+                          >
+                            <Trash2 size={16} /> Delete
+                          </button>
                         </div>
                       </div>
                     </div>
                   </div>
                 )}
-
-                <button
-                  onClick={() =>
-                    setExpandedId(
-                      expandedId === order.order_id ? null : order.order_id
-                    )
-                  }
-                  className="w-full py-2 flex justify-center text-gray-300 hover:text-main"
-                >
-                  <ChevronDown
-                    size={20}
-                    className={`transition-transform duration-500 ${
-                      expandedId === order.order_id ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
               </div>
             ))
         )}

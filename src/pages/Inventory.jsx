@@ -1,11 +1,15 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { supabase } from "../supabaseClient";
-import { Plus, Search, Edit2, Trash2, Package, X, Hash, AlignLeft, AlertCircle, ShieldAlert } from "lucide-react";
+import { 
+  Plus, Search, Edit2, Trash2, Package, X, Hash, 
+  AlignLeft, AlertCircle, ShieldAlert, ChevronDown, ChevronUp 
+} from "lucide-react";
 
 const Inventory = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [expandedId, setExpandedId] = useState(null); // Track which card is expanded
   const [deleteConfirm, setDeleteConfirm] = useState({ open: false, id: null, name: "" });
   const [errorPopup, setErrorPopup] = useState({ open: false, message: "" });
   const [searchTerm, setSearchTerm] = useState("");
@@ -30,18 +34,14 @@ const Inventory = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-
       setItems(data ?? []);
     } catch (error) {
       console.error("Failed to fetch items:", error);
-      // Optional: show user-friendly error
-      // setErrorPopup({ open: true, message: "Failed to load inventory" });
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // Load items on mount
   useEffect(() => {
     fetchItems();
   }, [fetchItems]);
@@ -64,7 +64,6 @@ const Inventory = () => {
 
     try {
       if (editingId) {
-        // Update existing item
         const { error } = await supabase
           .from("items")
           .update({
@@ -78,7 +77,6 @@ const Inventory = () => {
 
         if (error) throw error;
       } else {
-        // Insert new item
         const { error } = await supabase
           .from("items")
           .insert([formData]);
@@ -88,7 +86,7 @@ const Inventory = () => {
 
       setIsModalOpen(false);
       resetForm();
-      await fetchItems(); // Refresh list
+      await fetchItems(); 
     } catch (error) {
       let message = error.message;
       if (error.code === "23505") {
@@ -100,7 +98,8 @@ const Inventory = () => {
     }
   };
 
-  const handleEdit = (item) => {
+  const handleEdit = (item, e) => {
+    e.stopPropagation(); // Prevents the card from collapsing when clicking edit
     setFormData({
       item_id: item.item_id,
       item_name: item.item_name,
@@ -124,6 +123,7 @@ const Inventory = () => {
       if (error) throw error;
 
       setDeleteConfirm({ open: false, id: null, name: "" });
+      setExpandedId(null); // Close the expanded view after delete
       await fetchItems();
     } catch (error) {
       setErrorPopup({ open: true, message: error.message });
@@ -143,7 +143,7 @@ const Inventory = () => {
       {/* Header */}
       <div className="flex justify-between items-end">
         <div>
-          <h2 className="text-3xl font-black text-main">INVENTORY</h2>
+          <h2 className="text-3xl font-black text-main uppercase">Inventory</h2>
           <p className="text-gray-500 text-sm font-medium">
             Tracking {items.length} items
           </p>
@@ -181,47 +181,88 @@ const Inventory = () => {
             No items found
           </div>
         ) : (
-          filteredItems.map((item) => (
-            <div
-              key={item.item_id}
-              className="bg-gray-50/50 p-5 rounded-[24px] border border-main/10 shadow-sm flex justify-between items-center group hover:border-main hover:bg-white transition-all"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-main rounded-xl flex items-center justify-center text-sub shadow-md">
-                  <Package size={22} />
+          filteredItems.map((item) => {
+            const isExpanded = expandedId === item.item_id;
+            return (
+              <div
+                key={item.item_id}
+                onClick={() => setExpandedId(isExpanded ? null : item.item_id)}
+                className={`bg-white rounded-[24px] border transition-all duration-300 overflow-hidden cursor-pointer ${
+                  isExpanded ? "border-main shadow-md" : "border-gray-100 shadow-sm"
+                }`}
+              >
+                {/* Visible Card Area */}
+                <div className="p-5 flex justify-between items-center">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${isExpanded ? 'bg-main text-sub' : 'bg-gray-100 text-gray-400'}`}>
+                      <Package size={22} />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-main">{item.item_name}</h3>
+                      <p className="text-xs text-gray-400">ID: {item.item_id}</p>
+                    </div>
+                  </div>
+                  <div className="text-gray-300">
+                    {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-bold text-main">{item.item_name}</h3>
-                  <p className="text-xs text-gray-400 truncate max-w-[200px]">
-                    {item.item_description || "No description"}
-                  </p>
-                </div>
+
+                {/* Hidden/Expanded Area */}
+                {isExpanded && (
+                  <div className="px-5 pb-5 animate-in slide-in-from-top-2 duration-300">
+                    <div className="h-[1px] bg-gray-50 w-full mb-4" />
+                    
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                        <div className="bg-gray-50 p-3 rounded-2xl">
+                            <p className="text-[10px] uppercase font-bold text-gray-400">Stock</p>
+                            <p className="text-lg font-black text-main">{item.stock_quantity}</p>
+                        </div>
+                        <div className="bg-gray-50 p-3 rounded-2xl">
+                            <p className="text-[10px] uppercase font-bold text-gray-400">Sell Price</p>
+                            <p className="text-lg font-black text-emerald-600">Rs. {item.item_sell_price}</p>
+                        </div>
+                    </div>
+
+                    <div className="mb-6">
+                        <p className="text-[10px] uppercase font-bold text-gray-400 mb-1">Description</p>
+                        <p className="text-sm text-gray-600 italic">
+                            {item.item_description || "No description provided for this item."}
+                        </p>
+                    </div>
+
+                    {/* Action Buttons are here now */}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={(e) => handleEdit(item, e)}
+                        className="flex-1 bg-main text-sub py-3 rounded-xl font-bold flex items-center justify-center gap-2"
+                      >
+                        <Edit2 size={16} /> Edit
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteConfirm({
+                            open: true,
+                            id: item.item_id,
+                            name: item.item_name,
+                          });
+                        }}
+                        className="bg-red-50 text-red-500 p-3 rounded-xl hover:bg-red-500 hover:text-white transition-all"
+                      >
+                        <Trash2 size={20} />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleEdit(item)}
-                  className="p-2 text-gray-400 hover:text-main hover:bg-main/5 rounded-lg transition-all"
-                >
-                  <Edit2 size={18} />
-                </button>
-                <button
-                  onClick={() =>
-                    setDeleteConfirm({
-                      open: true,
-                      id: item.item_id,
-                      name: item.item_name,
-                    })
-                  }
-                  className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                >
-                  <Trash2 size={18} />
-                </button>
-              </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 
+      {/* --- ALL MODALS (ADD/EDIT, DELETE, ERROR) REMAIN THE SAME --- */}
+      {/* ... (Keep the rest of your original modal code here) ... */}
+      
       {/* ADD/EDIT MODAL */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-main/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
@@ -330,7 +371,7 @@ const Inventory = () => {
       {/* DELETE CONFIRMATION */}
       {deleteConfirm.open && (
         <div className="fixed inset-0 bg-main/80 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-sm rounded-[32px] p-8 text-center shadow-2xl animate-in fade-in slide-in-from-bottom-4">
+          <div className="bg-white w-full max-sm rounded-[32px] p-8 text-center shadow-2xl animate-in fade-in slide-in-from-bottom-4">
             <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <AlertCircle size={32} />
             </div>

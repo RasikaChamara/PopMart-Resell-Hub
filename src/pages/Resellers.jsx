@@ -172,10 +172,14 @@ const Resellers = () => {
   return (
     <div className="space-y-6 pb-24 p-4 max-w-5xl mx-auto">
       {/* Header */}
-      <div className="flex justify-between items-end">
+      <div className="flex justify-between items-center">
+        {" "}
+        {/* Changed items-end to items-center */}
         <div>
-          <h2 className="text-3xl font-black text-main">RESELLERS</h2>
-          <p className="text-gray-500 text-sm font-medium">
+          <h2 className="text-2xl font-black text-main uppercase tracking-tight">
+            Resellers
+          </h2>
+          <p className="text-gray-500 text-xs font-medium">
             Managing {resellers.length} partners
           </p>
         </div>
@@ -184,9 +188,10 @@ const Resellers = () => {
             resetForm();
             setIsModalOpen(true);
           }}
-          className="bg-sub text-main p-4 rounded-[20px] shadow-lg flex items-center gap-2 font-bold hover:scale-105 transition-all"
+          // Changed p-4 to px-5 py-3 for a sleeker, professional look
+          className="bg-sub text-main px-5 py-3 rounded-[18px] shadow-lg flex items-center gap-2 font-bold hover:scale-105 transition-all text-sm"
         >
-          <Plus size={20} /> Add Reseller
+          <Plus size={18} /> Add Reseller
         </button>
       </div>
 
@@ -211,151 +216,148 @@ const Resellers = () => {
             Loading partners...
           </div>
         ) : (
-          filteredResellers.map((reseller) => (
-            <div
-              key={reseller.reseller_id}
-              className={`bg-gray-50/50 rounded-[24px] border border-main/10 shadow-sm transition-all duration-300 flex flex-col overflow-hidden ${
-                expandedId === reseller.reseller_id
-                  ? "ring-2 ring-main bg-white shadow-md"
-                  : "hover:border-main"
-              }`}
-            >
-              {/* 1. TOP SECTION (Name & Actions) */}
-              <div className="p-5 flex justify-between items-center">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-main rounded-xl flex items-center justify-center text-sub shadow-md shrink-0">
-                    <Users size={22} />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-main leading-tight">
-                      {reseller.reseller_name}
-                    </h3>
-                    <div className="flex gap-3 text-[11px] text-gray-400 mt-1">
-                      <span className="font-mono bg-gray-200 px-2 rounded uppercase">
-                        {reseller.reseller_id}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Phone size={12} /> {reseller.contact_no}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => handleEdit(reseller)}
-                    className="p-2.5 text-gray-400 hover:text-main hover:bg-main/5 rounded-xl transition-all"
-                  >
-                    <Edit2 size={18} />
-                  </button>
-                  <button
-                    onClick={() =>
-                      setDeleteConfirm({
-                        open: true,
-                        id: reseller.reseller_id,
-                        name: reseller.reseller_name,
-                      })
-                    }
-                    className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              </div>
-
-              {/* 2. EXPANDABLE AREA (Details) */}
-              {expandedId === reseller.reseller_id && (
-                <div className="px-5 pb-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                  <div className="pt-4 border-t border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Left Column: Contact & Address */}
-                    <div className="space-y-3">
-                      <div className="bg-gray-50 p-3 rounded-2xl">
-                        <p className="text-[10px] uppercase font-bold text-gray-400 mb-1">
-                          Full Address
-                        </p>
-                        <div className="flex items-start gap-2">
-                          <MapPin size={14} className="text-main mt-0.5" />
-                          <p className="text-sm text-gray-600 leading-tight">
-                            {reseller.reseller_address || "No address provided"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="bg-gray-50 p-3 rounded-2xl flex items-center gap-2 text-green-600 font-bold text-sm">
-                        <MessageCircle size={16} />
-                        {reseller.whatsapp_no || "N/A"}
-                      </div>
-                    </div>
-
-                    {/* Right Column: Bank Details */}
-                    <div className="bg-main text-sub p-4 rounded-2xl">
-                      <p className="text-[10px] uppercase font-bold opacity-70 mb-3 flex items-center gap-2">
-                        <CreditCard size={14} /> Bank Details
-                      </p>
-                      <div className="grid grid-cols-2 gap-y-2 text-xs">
-                        <span className="opacity-70">Bank:</span>
-                        <span className="font-bold text-right">
-                          {reseller.bank_details?.bank || "—"}
-                        </span>
-                        <span className="opacity-70">Branch:</span>
-                        <span className="font-bold text-right">
-                          {reseller.bank_details?.branch || "—"}
-                        </span>
-                        <span className="opacity-70">Acc No:</span>
-                        <span className="font-bold text-right">
-                          {reseller.bank_details?.acc_no || "—"}
-                        </span>
-                        <span className="opacity-70">Card Holder:</span>
-                        <span className="font-bold text-right truncate pl-2">
-                          {reseller.bank_details?.card_holder || "—"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* 3. BOTTOM TOGGLE BAR (The Arrowhead) */}
-              <button
-                onClick={() =>
-                  setExpandedId(
-                    expandedId === reseller.reseller_id
-                      ? null
-                      : reseller.reseller_id
-                  )
-                }
-                className={`w-full py-2 flex justify-center items-center transition-all ${
-                  expandedId === reseller.reseller_id
-                    ? "bg-main/5 text-main"
-                    : "bg-transparent text-gray-300 hover:text-main"
+          filteredResellers.map((reseller) => {
+            const isExpanded = expandedId === reseller.reseller_id;
+            return (
+              <div
+                key={reseller.reseller_id}
+                className={`bg-gray-50/50 rounded-[24px] border border-main/10 shadow-sm transition-all duration-300 flex flex-col overflow-hidden ${
+                  isExpanded
+                    ? "ring-2 ring-main bg-white shadow-md"
+                    : "hover:border-main"
                 }`}
               >
+                {/* 1. TOP SECTION - Simplified click to toggle */}
                 <div
-                  className={`transition-transform duration-500 ${
-                    expandedId === reseller.reseller_id
-                      ? "rotate-180 text-main"
-                      : ""
-                  }`}
+                  className="p-5 flex justify-between items-center cursor-pointer"
+                  onClick={() =>
+                    setExpandedId(isExpanded ? null : reseller.reseller_id)
+                  }
                 >
-                  {/* Custom Arrowhead SVG */}
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-main rounded-xl flex items-center justify-center text-sub shadow-md shrink-0">
+                      <Users size={22} />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-main leading-tight">
+                        {reseller.reseller_name}
+                      </h3>
+                      <div className="flex gap-3 text-[11px] text-gray-400 mt-1">
+                        <span className="font-mono bg-gray-200 px-2 rounded uppercase text-main/70">
+                          {reseller.reseller_id}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Visual Indicator */}
+                  <div
+                    className={`text-gray-300 transition-transform duration-300 ${
+                      isExpanded ? "rotate-180" : ""
+                    }`}
                   >
-                    <path d="M6 9l6 6 6-6" />
-                  </svg>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M6 9l6 6 6-6" />
+                    </svg>
+                  </div>
                 </div>
-              </button>
-            </div>
-          ))
+
+                {/* 2. EXPANDABLE AREA */}
+                {isExpanded && (
+                  <div className="px-5 pb-5 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="pt-4 border-t border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+                      {/* Left Column: Contact & Address */}
+                      <div className="space-y-3">
+                        <div className="bg-gray-50 p-3 rounded-2xl">
+                          <p className="text-[10px] uppercase font-bold text-gray-400 mb-1">
+                            Full Address
+                          </p>
+                          <div className="flex items-start gap-2">
+                            <MapPin size={14} className="text-main mt-0.5" />
+                            <p className="text-sm text-gray-600 leading-tight">
+                              {reseller.reseller_address ||
+                                "No address provided"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="bg-gray-50 p-3 rounded-2xl flex items-center gap-2 text-main font-bold text-xs">
+                            <Phone size={14} /> {reseller.contact_no || "N/A"}
+                          </div>
+                          <div className="bg-green-50 p-3 rounded-2xl flex items-center gap-2 text-green-600 font-bold text-xs">
+                            <MessageCircle size={14} />{" "}
+                            {reseller.whatsapp_no || "N/A"}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right Column: Bank Details */}
+                      <div className="bg-main text-sub p-4 rounded-2xl">
+                        <p className="text-[10px] uppercase font-bold opacity-70 mb-3 flex items-center gap-2">
+                          <CreditCard size={14} /> Bank Details
+                        </p>
+                        <div className="grid grid-cols-2 gap-y-1 text-[11px]">
+                          <span className="opacity-70">Bank:</span>{" "}
+                          <span className="font-bold text-right">
+                            {reseller.bank_details?.bank || "—"}
+                          </span>
+                          <span className="opacity-70">Branch:</span>{" "}
+                          <span className="font-bold text-right truncate pl-2">
+                            {reseller.bank_details?.branch || "—"}
+                          </span>
+                          <span className="opacity-70">Acc No:</span>{" "}
+                          <span className="font-bold text-right">
+                            {reseller.bank_details?.acc_no || "—"}
+                          </span>
+                          <span className="opacity-70">Card Holder:</span>{" "}
+                          <span className="font-bold text-right truncate pl-2">
+                            {reseller.bank_details?.card_holder || "—"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 3. ACTIONS AREA - Moved here */}
+                    <div className="flex gap-2 pt-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation(); // Stop expansion toggle
+                          handleEdit(reseller);
+                        }}
+                        className="flex-1 py-3 bg-main/5 text-main hover:bg-main hover:text-sub rounded-xl font-bold flex items-center justify-center gap-2 transition-all"
+                      >
+                        <Edit2 size={16} /> Edit Reseller
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation(); // Stop expansion toggle
+                          setDeleteConfirm({
+                            open: true,
+                            id: reseller.reseller_id,
+                            name: reseller.reseller_name,
+                          });
+                        }}
+                        className="px-5 py-3 text-red-500 bg-red-50 hover:bg-red-500 hover:text-white rounded-xl transition-all"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })
         )}
       </div>
-
       {/* ADD/EDIT MODAL */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-main/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
